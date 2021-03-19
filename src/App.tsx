@@ -1,26 +1,62 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useMemo } from "react";
+import { BrowserRouter } from "react-router-dom";
+import {
+  CssBaseline,
+  createMuiTheme,
+  ThemeProvider,
+  useMediaQuery,
+} from "@material-ui/core";
+import { ruRU } from "@material-ui/core/locale";
 
-function App() {
+import { CountriesPreloader } from "./api";
+import { StoreProvider } from "./stores";
+import { Routes } from "./routes";
+
+const containerSelector = "root";
+const fullscreen = { width: "100%", height: "100%" };
+
+const PUBLIC_URL = process.env.PUBLIC_URL;
+
+function AppProvider() {
+  const prefersDarkMode = useMediaQuery("(prefers-color-scheme: dark)");
+
+  const theme = useMemo(
+    () =>
+      createMuiTheme(
+        {
+          palette: {
+            type: prefersDarkMode ? "dark" : "light",
+          },
+          overrides: {
+            MuiCssBaseline: {
+              "@global": {
+                html: { ...fullscreen },
+                body: { ...fullscreen },
+                ["#" + containerSelector]: {
+                  ...fullscreen,
+                  display: "flex",
+                  flexDirection: "column",
+                },
+              },
+            },
+          },
+        },
+        ruRU
+      ),
+    [prefersDarkMode]
+  );
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <StoreProvider>
+      <ThemeProvider theme={theme}>
+        <BrowserRouter basename={PUBLIC_URL}>
+          <CssBaseline />
+          <CountriesPreloader />
+          <Routes />
+        </BrowserRouter>
+      </ThemeProvider>
+    </StoreProvider>
   );
 }
 
-export default App;
+export default AppProvider;
